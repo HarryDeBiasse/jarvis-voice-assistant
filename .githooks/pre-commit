@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Block commits that contain private network info or secrets.
+set -uo pipefail
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+ip='(\b10\.[0-9]+\.[0-9]+\.[0-9]+|\b192\.168\.[0-9]+\.[0-9]+|\b172\.(1[6-9]|2[0-9]|3[01])\.[0-9]+\.[0-9]+|\b100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]+\.[0-9]+)'
+mac='\b([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}\b'
+key='(sk-ant-[A-Za-z0-9_-]{8,}|-----BEGIN (RSA|OPENSSH|EC|DSA|PRIVATE) KEY-----)'
+fail=0
+for f in $staged; do
+  case "$f" in *.example|*.example.*|.githooks/*) continue;; esac
+  c=$(git show ":$f" 2>/dev/null || true)
+  if printf '%s' "$c" | grep -nEq "$ip";  then echo "BLOCK [$f]: private IP address";  printf '%s' "$c" | grep -nE "$ip"  | head -3; fail=1; fi
+  if printf '%s' "$c" | grep -nEq "$mac"; then echo "BLOCK [$f]: MAC address";          fail=1; fi
+  if printf '%s' "$c" | grep -nEq "$key"; then echo "BLOCK [$f]: key material";          fail=1; fi
+done
+if [ "$fail" = 1 ]; then
+  echo ""
+  echo "Commit blocked: sensitive info detected. Use placeholders (see *.example) or add the file to .gitignore."
+  exit 1
+fi
+exit 0

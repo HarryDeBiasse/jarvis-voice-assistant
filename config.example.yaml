@@ -1,0 +1,5 @@
+# Copy to ~/jarvis/config.yaml (gitignored). Consumed by jerry_voice.py.
+pc_mac: "AA:BB:CC:DD:EE:FF"
+openclaw_gateway: "https://your-gateway.example.com"
+piper_voice: "/home/you/jarvis/voices/en_US-lessac-medium.onnx"
+whisper_model: "base.en"

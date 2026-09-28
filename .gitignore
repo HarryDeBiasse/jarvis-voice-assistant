@@ -1,0 +1,16 @@
+# Secrets & machine-specific config — never commit
+config.yaml
+jarvis.env
+.anthropic_key
+.deepgram_key
+*.key
+openclaw.json
+# Runtime / generated
+__pycache__/
+*.pyc
+*.wav
+*.onnx
+models/
+acks/
+fillers/
+api_cost.json
